@@ -1,9 +1,11 @@
 const express = require("express");
+const fb = require("./credentials/fb")
+// console.log(fb);
 // const mongoose = require('mongoose');
 // let User = require('./db/User');
 
 const app = express();
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 8000;
 
 // mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/TodoApp');
 
@@ -12,19 +14,14 @@ app.use(express.json());
 
 let passport = require('passport')
   , FacebookStrategy = require('passport-facebook').Strategy;
-
-passport.use(new FacebookStrategy({
-    clientID: "345559736161569",
-    clientSecret: "6705f1f44f869b409c5c1d8551f3e8e7",
-    callbackURL: "http://www.localhost:3001/auth/facebook/callback"
-  },
+passport.use(new FacebookStrategy(fb,
   function(accessToken, refreshToken, profile, done) {
     console.log(accessToken, refreshToken, profile);
   }
 ));
 
 app.route('/').get(function(req,  res){
-  res.send("heelo");
+  res.send("hello homepage");
 })
 
 app.route('/login').get(function(req,  res){
