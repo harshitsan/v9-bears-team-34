@@ -1,8 +1,8 @@
 const express = require("express");
-const fb = require("./credentials/fb")
-// console.log(fb);
+const passport = require('passport')
+
+const oAuth = require("./credentials/oAuth")
 // const mongoose = require('mongoose');
-// let User = require('./db/User');
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -11,10 +11,15 @@ const port = process.env.PORT || 8000;
 
 app.use(express.json());
 
+var GitHubStrategy = require('passport-github').Strategy;
+passport.use(new GitHubStrategy(oAuth.github,
+  function(accessToken, refreshToken, profile, cb) {
+    console.log(accessToken, refreshToken, profile);
+  }
+));
 
-let passport = require('passport')
-  , FacebookStrategy = require('passport-facebook').Strategy;
-passport.use(new FacebookStrategy(fb,
+  var FacebookStrategy = require('passport-facebook').Strategy;
+passport.use(new FacebookStrategy(oAuth.facebook,
   function(accessToken, refreshToken, profile, done) {
     console.log(accessToken, refreshToken, profile);
   }
@@ -33,8 +38,9 @@ app.route('/auth/facebook').get(passport.authenticate('facebook'),(req, res)=>{
 });
 
 app.route('/auth/facebook/callback').get(
-  passport.authenticate('facebook', { successRedirect: '/',
-                                      failureRedirect: '/login' }));
+  passport.authenticate('facebook'),(req, res)=>{
+    console.log(req,"logged in");
+  });
 
 app.listen(port, function() {
   console.log(`Server listening on port ${port}`);
