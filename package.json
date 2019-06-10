@@ -1,0 +1,33 @@
+{
+  "name": "v9-bears-team-34",
+  "version": "1.0.0",
+  "description": "Add-project-description-here | Voyage-9 | https://chingu.io/",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "server": "nodemon server.js",
+    "client": "npm start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "client-install": "npm install --prefix client"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ak4ra/v9-bears-team-34.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ak4ra/v9-bears-team-34/issues"
+  },
+  "homepage": "https://github.com/ak4ra/v9-bears-team-34#readme",
+  "devDependencies": {
+    "concurrently": "^4.1.0",
+    "nodemon": "^1.19.1"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongodb": "^3.2.7",
+    "mongoose": "^5.5.14"
+  }
+}
