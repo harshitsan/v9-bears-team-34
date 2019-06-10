@@ -32,6 +32,14 @@ app.route('/').get(function(req,  res){
 app.route('/login').get(function(req,  res){
   res.send("try again");
 })
+app.route('/auth/github').get(passport.authenticate('github'),(req, res)=>{
+  console.log("success");
+});
+
+app.route('/auth/github/callback').get(
+  passport.authenticate('facebook'),(req, res)=>{
+    console.log(req,"logged in");
+  });
 
 app.route('/auth/facebook').get(passport.authenticate('facebook'),(req, res)=>{
   console.log("success");
