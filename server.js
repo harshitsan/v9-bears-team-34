@@ -39,7 +39,6 @@ app.route('/auth/github').get(passport.authenticate('github'),(req, res)=>{
 app.route('/auth/github/callback').get(
   passport.authenticate('github',{ failureRedirect: '/login' }),(req, res)=>{
     console.log(req,"logged in");
-    // console.log(req,"logged in");
     res.redirect('/');
   });
 
@@ -48,10 +47,10 @@ app.route('/auth/facebook').get(passport.authenticate('facebook'),(req, res)=>{
 });
 
 app.route('/auth/facebook/callback').get(
-  passport.authenticate('facebook',{ failureRedirect: '/login' }),(req, res)=>{
-    console.log(req,"logged in");
-    res.redirect('/');
-  });
+  passport.authenticate('facebook', {
+            successRedirect : '/login',
+            failureRedirect : '/'
+        }));
 
 app.listen(port, function() {
   console.log(`Server listening on port ${port}`);
