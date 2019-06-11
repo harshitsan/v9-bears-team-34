@@ -1,28 +1,66 @@
 const express = require("express");
-const passport = require('passport')
+const passport = require('passport');
+const GitHubStrategy = require('passport-github').Strategy;
+const FacebookStrategy = require('passport-facebook').Strategy;
+const mongoose = require('mongoose');
 
-const oAuth = require("./credentials/oAuth")
-// const mongoose = require('mongoose');
+var https = require('https')
+var fs = require('fs')
+
+const oAuth = require("./credentials/oAuth");
+
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/FoodBnB', {useNewUrlParser: true});
+
+let User = require('./db/User.js');
 
 const app = express();
-const port = process.env.PORT || 8000;
 
-// mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/TodoApp');
+const port = process.env.PORT || 8000;
 
 app.use(express.json());
 
-var GitHubStrategy = require('passport-github').Strategy;
 passport.use(new GitHubStrategy(oAuth.github,
-  function(accessToken, refreshToken, profile, cb) {
-    console.log(accessToken, refreshToken, profile);
+  function(accessToken, refreshToken, profile, done) {
+    // console.log(profile._json);
+    let newUser = profile._json;
+    newUser.provider = "Github";
+    User.findOne(newUser).then((user)=>{
+        if (!user) {
+            user = new User(newUser);
+            user.save().then((doc)=>{
+                if (doc) console.log(doc);
+                return done(doc);
+            },(e)=>{
+              return done(e);
+            });
+        } else {
+            return done(user);
+        }
+    },(e)=>{
+          return done(e);
+    });
   }
 ));
 
-  var FacebookStrategy = require('passport-facebook').Strategy;
 passport.use(new FacebookStrategy(oAuth.facebook,
   function(accessToken, refreshToken, profile, done) {
-    // console.log(accessToken, refreshToken, profile);
-      done(null);
+      let newUser = profile._json;
+      newUser.provider = "Facebook";
+      User.findOne(newUser).then((user)=>{
+        if (!user) {
+              user = new User(newUser);
+              user.save().then((doc)=>{
+                  if (doc) console.log(doc);
+                  return done(doc);
+              },(e)=>{
+                return done(e, user);
+              });
+          } else {
+              return done(user);
+          }
+      },(e)=>{
+            return done(e);
+      });
   }
 ));
 
@@ -33,26 +71,38 @@ app.route('/').get(function(req,  res){
 app.route('/login').get(function(req,  res){
   res.send("try again");
 })
-app.route('/auth/github').get(passport.authenticate('github'),(req, res)=>{
-  console.log("success");
-});
 
-app.route('/auth/github/callback').get(
-  passport.authenticate('github',{ failureRedirect: '/login' }),(req, res)=>{
-    console.log(req,"logged in");
+//github routes
+
+app.get('/auth/github',
+  passport.authenticate('github'));
+
+app.get('/auth/github/callback',
+  passport.authenticate('github', { failureRedirect: '/login' }),
+  function(req, res) {
     res.redirect('/');
   });
 
-app.route('/auth/facebook').get(passport.authenticate('facebook'),(req, res)=>{
+  //facebook routes
+
+app.route('/auth/facebook').get(passport.authenticate('facebook',{
+  authType: 'rerequest',
+  scope: ['email']
+}),(req, res)=>{
   console.log("success");
 });
 
 app.route('/auth/facebook/callback').get(
   passport.authenticate('facebook', {
-            successRedirect : '/login',
-            failureRedirect : '/'
+            successRedirect : '/',
+            failureRedirect : '/login'
         }));
-
-app.listen(port, function() {
-  console.log(`Server listening on port ${port}`);
-});
+//To generate server.cert and server.key
+//use command :$ openssl req -nodes -new -x509 -keyout server.key -out server.cert
+https.createServer({  //must be served on https server for authentication
+  key: fs.readFileSync('server.key'),
+  cert: fs.readFileSync('server.cert')
+}, app)
+.listen(port, function () {
+  console.log(`Example app listening on port ${port}! Go to https://localhost:${port}/`)
+})
