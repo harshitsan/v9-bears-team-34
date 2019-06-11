@@ -21,7 +21,8 @@ passport.use(new GitHubStrategy(oAuth.github,
   var FacebookStrategy = require('passport-facebook').Strategy;
 passport.use(new FacebookStrategy(oAuth.facebook,
   function(accessToken, refreshToken, profile, done) {
-    console.log(accessToken, refreshToken, profile);
+    // console.log(accessToken, refreshToken, profile);
+      done(null);
   }
 ));
 
